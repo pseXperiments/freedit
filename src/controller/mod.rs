@@ -165,6 +165,7 @@ struct User {
     role: u8,
     url: String,
     about: String,
+    eddsa_publickey : String,
 }
 
 impl User {

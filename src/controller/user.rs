@@ -596,6 +596,8 @@ pub(crate) struct FormUser {
     home_page: u8,
     #[garde(skip)]
     lang: String,
+    #[garde(length(max = 256))]
+    eddsa_publickey: String,
 }
 
 /// Page data: `user_setting.html`
@@ -608,6 +610,7 @@ struct PageUserSetting<'a> {
     url: String,
     about: String,
     sessions: Vec<String>,
+    eddsa_publickey: String,
     home_page: u8,
 }
 
@@ -645,6 +648,7 @@ pub(crate) async fn user_setting(
         username: user.username,
         about: user.about,
         url: user.url,
+        eddsa_publickey: user.eddsa_publickey,
         sessions,
         home_page,
     };
@@ -767,6 +771,10 @@ pub(crate) async fn user_setting_post(
     user.username = username.to_string();
     user.about = clean_html(&input.about);
     user.url = clean_html(&input.url);
+
+    // check if eddsa_publickey is valid
+
+    user.eddsa_publickey = input.eddsa_publickey.clone();
     DB.open_tree("home_pages")?
         .insert(u32_to_ivec(user.uid), &[input.home_page])?;
 
@@ -878,7 +886,6 @@ pub(crate) async fn signin_post(Form(input): Form<FormSignin>) -> impl IntoRespo
         sleep(Duration::from_secs(1)).await;
         Err(AppError::WrongPassword)
     }
-
 }
 
 /// Form data: `/signup`
@@ -965,17 +972,17 @@ fn captcha_digits() -> Captcha {
 /// `POST /signup`
 pub(crate) async fn signup_post(
     WithValidation(input): WithValidation<Form<FormSignup>>,
-) -> Result<impl IntoResponse, AppError> {    
+) -> Result<impl IntoResponse, AppError> {
     let username = clean_html(&input.username);
     if !is_valid_name(&username) {
         return Err(AppError::NameInvalid);
     }
-     
+
     let site_config = SiteConfig::get(&DB)?;
     if site_config.invitation_code != input.invitation_code {
-        return Err(AppError::Unauthorized);        
+        return Err(AppError::Unauthorized);
     }
-    
+
     let captcha_char = DB
         .open_tree("captcha")?
         .remove(&input.captcha_id)?
