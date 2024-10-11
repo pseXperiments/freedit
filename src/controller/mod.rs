@@ -486,6 +486,8 @@ pub(super) struct SiteConfig {
     spam_regex: Option<String>,
     #[garde(length(max = 16))]
     lang: String,
+    #[garde(skip)]
+    invitation_code: Option<String>,
 }
 
 impl SiteConfig {

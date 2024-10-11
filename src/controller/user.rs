@@ -878,6 +878,7 @@ pub(crate) async fn signin_post(Form(input): Form<FormSignin>) -> impl IntoRespo
         sleep(Duration::from_secs(1)).await;
         Err(AppError::WrongPassword)
     }
+
 }
 
 /// Form data: `/signup`
@@ -892,6 +893,7 @@ pub(crate) struct FormSignup {
     password2: String,
     captcha_id: String,
     captcha_value: String,
+    invitation_code: Option<String>,
 }
 
 /// Page data: `signup.html`
@@ -901,6 +903,7 @@ struct PageSignup<'a> {
     page_data: PageData<'a>,
     captcha_id: String,
     captcha_image: String,
+    site_config: &'a SiteConfig,
 }
 
 /// `GET /signup`
@@ -934,6 +937,7 @@ pub(crate) async fn signup() -> Result<impl IntoResponse, AppError> {
         page_data,
         captcha_id,
         captcha_image: captcha.as_base64().unwrap(),
+        site_config: &site_config,
     };
     Ok(into_response(&page_signup))
 }
@@ -961,12 +965,17 @@ fn captcha_digits() -> Captcha {
 /// `POST /signup`
 pub(crate) async fn signup_post(
     WithValidation(input): WithValidation<Form<FormSignup>>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<impl IntoResponse, AppError> {    
     let username = clean_html(&input.username);
     if !is_valid_name(&username) {
         return Err(AppError::NameInvalid);
     }
-
+     
+    let site_config = SiteConfig::get(&DB)?;
+    if site_config.invitation_code != input.invitation_code {
+        return Err(AppError::Unauthorized);        
+    }
+    
     let captcha_char = DB
         .open_tree("captcha")?
         .remove(&input.captcha_id)?

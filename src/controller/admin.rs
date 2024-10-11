@@ -368,6 +368,10 @@ pub(crate) async fn admin_post(
         }
         _ => None,
     };
+    site_config.invitation_code = match site_config.invitation_code {
+        Some(s) if !s.is_empty() => Some(s),
+        _ => None,
+    };
 
     site_config.site_name = clean_html(&site_config.site_name);
     site_config.domain = clean_html(&site_config.domain);
@@ -399,6 +403,7 @@ impl Default for SiteConfig {
             home_page: 0,
             spam_regex: None,
             lang: "en".into(),
+            invitation_code: None,
         }
     }
 }

@@ -14,6 +14,16 @@
             <div class="content">
                 <center><h1>{{ "sign_up"|l10n(page_data.lang) }}</h1></center>
             </div>
+
+            {% if site_config.invitation_code.is_some() %}
+            <div class="field">
+                <div class="control has-icons-left">
+                    <input name="invitation_code" class="input" type="input" required placeholder="Invitation code">
+                    <span class="icon is-left">🎁</span>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="field">
                 <div class="control has-icons-left">
                     <input name="username" class="input" type="text" pattern="^\D.*" title='{{ "user_name_help"|l10n(page_data.lang) }}' required placeholder='{{ "user_name_help"|l10n(page_data.lang) }}' minlength="1" maxlength="32">
