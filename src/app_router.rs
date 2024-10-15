@@ -1,25 +1,16 @@
 use crate::{
     config::CONFIG,
     controller::{
-        admin::{admin, admin_gallery, admin_post, admin_view},
-        feed::{feed, feed_add, feed_add_post, feed_read, feed_star, feed_subscribe, feed_update},
-        inn::{
+        admin::{admin, admin_gallery, admin_post, admin_view}, feed::{feed, feed_add, feed_add_post, feed_read, feed_star, feed_subscribe, feed_update}, inn::{
             comment_delete, comment_downvote, comment_hide, comment_post, comment_upvote,
             edit_post, edit_post_post, inn, inn_feed, inn_join, inn_list, mod_feed_post, mod_inn,
             mod_inn_post, post, post_delete, post_downvote, post_hide, post_lock, post_pin,
             post_upvote, preview, tag,
-        },
-        message::{inbox, key, key_post, message, message_post},
-        meta_handler::{encoding_js, encryption_js, favicon, handler_404, home, robots, style},
-        notification::notification,
-        solo::{solo, solo_delete, solo_like, solo_list, solo_post},
-        tantivy::search,
-        upload::{gallery, image_delete, upload, upload_pic_post, upload_post},
-        user::{
+        }, message::{inbox, key, key_post, message, message_post}, meta_handler::{encoding_js, encryption_js, favicon, handler_404, home, robots, style}, notification::notification, poll::{poll_results, post_pollvote}, solo::{solo, solo_delete, solo_like, solo_list, solo_post}, tantivy::search, upload::{gallery, image_delete, upload, upload_pic_post, upload_post}, user::{
             remove_session, reset, reset_post, role_post, signin, signin_post, signout, signup,
             signup_post, user, user_follow, user_list, user_password_post, user_recovery_code,
             user_setting, user_setting_post,
-        },
+        }
     },
 };
 use axum::{
@@ -86,11 +77,13 @@ pub async fn router() -> Router {
         .route("/post/:iid/:pid/:cid/delete", get(comment_delete))
         .route("/post/:iid/:pid/:cid/hide", get(comment_hide))
         .route("/post/edit/:pid", get(edit_post).post(edit_post_post))
+        .route("/post/:iid/:pid/pollvote", get(post).post(post_pollvote))
         .route("/post/:iid/:pid/upvote", get(post_upvote))
         .route("/post/:iid/:pid/downvote", get(post_downvote))
         .route("/post/:iid/:pid/delete", get(post_delete))
         .route("/post/:iid/:pid/:cid/upvote", get(comment_upvote))
         .route("/post/:iid/:pid/:cid/downvote", get(comment_downvote))
+        .route("/poll/:iid/:pid", get(poll_results))
         .route("/preview", get(post).post(preview))
         .route("/solo/user/:u", get(solo_list).post(solo_post))
         .route("/solo/:sid/like", get(solo_like))

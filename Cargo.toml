@@ -6,6 +6,8 @@ license = "MIT License"
 
 [dependencies]
 ammonia = "4.0.0"
+askama = "0.12.1"
+askama_axum = "0.4.0"
 atom_syndication = { version = "0.12", default-features = false }
 axum = { version = "0.7.5", features = ["http1", "http2", "form", "query", "multipart", "tokio"], default-features = false }
 axum-extra = { version = "0.9", features = ["typed-header"] }
@@ -44,6 +46,7 @@ syntect = { version = "5", features = ["regex-fancy", "default-syntaxes", "defau
 tantivy = "0.22.0"
 thiserror = "2"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+toml = "0.8.19"
 tower = { version = "0.5.1", features = ["timeout"] }
 tower-http = { version = "0.6.1", features = ["fs", "compression-zstd", "trace"] }
 tracing = { version = "0.1", features = ["release_max_level_info", "max_level_info"], default-features = false }

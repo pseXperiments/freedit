@@ -1208,7 +1208,7 @@ pub(crate) async fn inn_feed(Path(i): Path<String>) -> Result<impl IntoResponse,
     for i in index.into_iter() {
         let post: Post = get_one(&DB, "posts", i)?;
         let user: User = get_one(&DB, "users", post.uid)?;
-        let content = post.content.to_html(&DB)?;
+        let content = post.content.to_html(&DB, None)?;
         let updated = Timestamp::from_second(post.created_at)
             .unwrap()
             .strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -1221,7 +1221,6 @@ pub(crate) async fn inn_feed(Path(i): Path<String>) -> Result<impl IntoResponse,
             author: (user.username, user.uid),
             content,
         };
-
         entries.push(entry);
     }
 
@@ -1596,6 +1595,9 @@ pub(crate) async fn post(
             PostContent::FeedItemId(_) => "This post is auto-generated from RSS feed".into(),
         },
     };
+
+    let uid = claim.as_ref().map(|c| c.uid);
+
     let content = match post.status {
         PostStatus::HiddenByMod => "<p><i>Hidden by mod.</i></p>".into(),
         PostStatus::HiddenByUser => "<p><i>Hidden by user.</i></p>".into(),
@@ -1615,10 +1617,10 @@ pub(crate) async fn post(
                     "#,
                     diff
                 );
-                content.push_str(&post.content.to_html(&DB)?);
+                content.push_str(&post.content.to_html(&DB, Some((iid, pid, uid)))?);
                 content
             } else {
-                post.content.to_html(&DB)?
+                post.content.to_html(&DB, Some((iid, pid, uid)))?
             }
         }
     };

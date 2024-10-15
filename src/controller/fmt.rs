@@ -4,6 +4,8 @@ use jiff::Timestamp;
 use pulldown_cmark::{html, CodeBlockKind, Event, Options, Tag};
 use syntect::{highlighting::ThemeSet, html::highlighted_html_for_string, parsing::SyntaxSet};
 
+use super::poll::Poll;
+
 /// convert a `i64` timestamp to a date [`String`]
 pub(super) fn ts_to_date(timestamp: i64) -> String {
     Timestamp::from_second(timestamp)
@@ -128,6 +130,10 @@ impl<'a, I: Iterator<Item = Event<'a>>> Iterator for SyntaxPreprocessor<'a, I> {
         let mut code = String::with_capacity(64);
         while let Some(Event::Text(text)) = self.parent.next() {
             code.push_str(&text);
+        }
+
+        if lang == "survey".into() {
+            return Some(Event::Html(Poll::HTML_PLACEHOLDER.into()));
         }
 
         Some(Event::Html(code_highlighter(&code, &lang).into()))

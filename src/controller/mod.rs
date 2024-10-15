@@ -91,6 +91,11 @@
 //! | "comment_upvotes"     | `pid#cid#uid`        | `&[]`       |
 //! | "comment_downvotes"   | `pid#cid#uid`        | `&[]`       |
 //!
+//! ### polls
+//! | tree                             | key             | value       |
+//! |----------------------------------|-----------------|-------------|
+//! | "poll_contribution"              | `pid#uid`       | `&[]`       |
+//!
 //! ### rss
 //! | tree                  | key                  | value       |
 //! |-----------------------|----------------------|-------------|
@@ -123,6 +128,7 @@ pub(super) mod tantivy;
 pub(super) mod admin;
 pub(super) mod inn;
 pub(super) mod message;
+pub(super) mod poll;
 pub(super) mod solo;
 pub(super) mod upload;
 pub(super) mod user;
@@ -141,6 +147,7 @@ use bincode::config::standard;
 use bincode::{Decode, Encode};
 use garde::Validate;
 use jiff::{Timestamp, ToSpan};
+use poll::{Poll, PollResult};
 use serde::{Deserialize, Serialize};
 use sled::Db;
 use std::fmt::Display;
@@ -165,7 +172,7 @@ struct User {
     role: u8,
     url: String,
     about: String,
-    eddsa_publickey : String,
+    eddsa_publickey: String,
 }
 
 impl User {
@@ -326,9 +333,39 @@ pub(super) enum PostContent {
 }
 
 impl PostContent {
-    fn to_html(&self, db: &Db) -> Result<String, AppError> {
+    fn to_html(
+        &self,
+        db: &Db,
+        iid_pid_poll: Option<(u32, u32, Option<u32>)>,
+    ) -> Result<String, AppError> {
         match self {
-            PostContent::Markdown(md) => Ok(md2html(md)),
+            PostContent::Markdown(md) => {
+                let mut html = md2html(md);
+                if let Some(poll) = Poll::from_markdown(md) {
+                    html = match poll {
+                        Ok(poll) => {
+                            let (iid, pid, uid) = iid_pid_poll.unwrap();
+                            let polls_tree = db.open_tree("poll_contribution")?;
+                            let voted = if let Some(uid) = uid {
+                                let k = &[u32_to_ivec(pid), u32_to_ivec(uid)].concat();
+                                if let Some(voted) = polls_tree.get(k)? {
+                                    let voted = voted.to_vec();
+                                    let (results, _): (PollResult, usize) =
+                                        bincode::decode_from_slice(&voted[..], standard())?;
+                                    Some(results)
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            };
+                            poll.replace_content(&html, iid, pid, voted)
+                        }
+                        Err(e) => format!("<div class=\"notification is-danger\">{}</div>", e),
+                    }
+                }
+                Ok(html)
+            }
             PostContent::FeedItemId(id) => {
                 let item: Item = get_one(db, "items", *id)?;
                 let mut content = format!(
