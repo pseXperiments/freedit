@@ -30,6 +30,10 @@ async fn main() -> Result<(), AppError> {
     tokio::spawn(async move {
         loop {
             let snapshot_path = PathBuf::from("snapshots");
+            // create snapshot dir if needed
+            if !snapshot_path.exists() {
+                fs::create_dir_all(&snapshot_path).unwrap();
+            }
             // create a snapshot
             create_snapshot(&snapshot_path, &DB);
             // remove snapshots older than 48 hours
@@ -99,7 +103,7 @@ async fn main() -> Result<(), AppError> {
 
 // TODO: TEST with https://github.com/hatoo/oha
 #[allow(dead_code)]
-fn create_snapshot(snapshot_dir: &PathBuf, db: &sled::Db) {
+fn create_snapshot(snapshot_path: &PathBuf, db: &sled::Db) {
     let checksum = db.checksum().unwrap();
     info!(%checksum);
 
@@ -108,10 +112,7 @@ fn create_snapshot(snapshot_dir: &PathBuf, db: &sled::Db) {
        .unwrap()
        .as_secs();
 
-    let mut snapshot_path = PathBuf::from(snapshot_dir);
-    if !snapshot_path.exists() {
-        fs::create_dir_all(&snapshot_path).unwrap();
-    }
+    let mut snapshot_path = snapshot_path.clone();
     snapshot_path.push(format!("{VERSION}_{timestamp}_{checksum}"));
     let snapshot_cfg = sled::Config::default().path(&snapshot_path);
     let snapshot = snapshot_cfg.open().unwrap();
