@@ -1,16 +1,26 @@
 use crate::{
     config::CONFIG,
     controller::{
-        admin::{admin, admin_gallery, admin_post, admin_view}, feed::{feed, feed_add, feed_add_post, feed_read, feed_star, feed_subscribe, feed_update}, inn::{
+        admin::{admin, admin_gallery, admin_post, admin_view},
+        feed::{feed, feed_add, feed_add_post, feed_read, feed_star, feed_subscribe, feed_update},
+        inn::{
             comment_delete, comment_downvote, comment_hide, comment_post, comment_upvote,
             edit_post, edit_post_post, inn, inn_feed, inn_join, inn_list, mod_feed_post, mod_inn,
             mod_inn_post, post, post_delete, post_downvote, post_hide, post_lock, post_pin,
             post_upvote, preview, tag,
-        }, message::{inbox, key, key_post, message, message_post}, meta_handler::{encoding_js, encryption_js, favicon, handler_404, home, robots, style}, notification::notification, poll::{poll_results, post_pollvote}, solo::{solo, solo_delete, solo_like, solo_list, solo_post}, tantivy::search, upload::{gallery, image_delete, upload, upload_pic_post, upload_post}, user::{
+        },
+        message::{inbox, key, key_post, message, message_post},
+        meta_handler::{encoding_js, encryption_js, favicon, handler_404, home, robots, style},
+        notification::notification,
+        poll::{poll_results, post_pollvote},
+        solo::{solo, solo_delete, solo_like, solo_list, solo_post},
+        tantivy::search,
+        upload::{gallery, image_delete, upload, upload_pic_post, upload_post},
+        user::{
             remove_session, reset, reset_post, role_post, signin, signin_post, signout, signup,
             signup_post, user, user_follow, user_list, user_password_post, user_recovery_code,
             user_setting, user_setting_post,
-        }
+        },
     },
 };
 use axum::{

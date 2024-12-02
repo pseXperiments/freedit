@@ -305,7 +305,7 @@ pub(crate) async fn poll_results(
         poll_info.push_str(&format!("{:?}\n", response));
     }
 
-    let page_data = PageData::new(&"Poll Info", &site_config, claim, has_unread);
+    let page_data = PageData::new("Poll Info", &site_config, claim, has_unread);
     let poll_info = PollInfo {
         page_data,
         poll_info,
@@ -358,6 +358,4 @@ multiple = true
 "#;
 
     let _poll: Poll = toml::from_str(txt).unwrap();
-
-    unimplemented!()
 }
