@@ -10,22 +10,32 @@ build:
 
 [working-directory: 'apps/client']
 build-client:
-    bun tsc -b && bun vite build
+    @bun tsc -b
+    bun vite build
 
+[working-directory: 'apps/server']
 build-server:
-    cargo build -r
+    @cargo build -r
+
+clean-server:
+  @rm -fr apps/server/{config.toml,freedit.db,snapshots,static/imgs,tantivy,target}
 
 dev:
-    @echo "Starting freeding server and web client..."
-    just dev-client &
-    just dev-server
+    @just dev-client & just dev-server
 
 [working-directory: 'apps/client']
 dev-client:
-    bun vite dev
+    @bun vite dev
 
+[working-directory: 'apps/server']
 dev-server:
-    cargo run
+    @cargo run
 
-preview:
-    vite preview
+start:
+  @just start-server & just start-client
+
+start-server:
+  @./apps/server/target/release/freedit
+
+start-client:
+    @vite preview

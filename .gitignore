@@ -2,13 +2,12 @@
 .envrc
 .tool-versions
 
-apps/server/freedit.db*
+apps/server/freedit.db
 apps/server/config.toml
+apps/server/static/imgs
+apps/server/snapshots
+apps/server/tantivy
 certs
-freedit.db
-snapshots
-static/imgs
-tantivy
 target
 
 bun.lockb

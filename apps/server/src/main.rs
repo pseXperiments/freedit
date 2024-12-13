@@ -29,12 +29,7 @@ async fn main() -> Result<(), AppError> {
     #[cfg(not(debug_assertions))]
     tokio::spawn(async move {
         loop {
-            let snapshot_path = PathBuf::from("snapshots");
-            // create snapshot dir if needed
-            if !snapshot_path.exists() {
-                fs::create_dir_all(&snapshot_path).unwrap();
-            }
-            // create a snapshot
+            let snapshot_path = &CONFIG.snapshots_path;
             create_snapshot(&snapshot_path, &DB);
             // remove snapshots older than 48 hours
             if let Err(e) = prune_snapshots(&snapshot_path) {
