@@ -1,3 +1,5 @@
+**Not maintained/in development anymore, we moved to https://github.com/privacy-scaling-explorations/pse-forums**
+
 # PSE Freedit
 
 ## Develop
